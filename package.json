@@ -12,6 +12,8 @@
   "scripts": {
     "build": "npx tsc",
     "watch": "npx tsc --watch",
+    "clean": "rm -rf ./dist",
+    "prep": "npm run clean && npm i && npm run build",
     "lint": "npx eslint --ext ts",
     "test": "npx mocha -r source-map-support/register -r module-alias/register ./dist/test/{unit,integration}/*.js --no-deprecation"
   },
