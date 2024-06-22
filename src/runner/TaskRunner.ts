@@ -21,7 +21,7 @@ export class TaskRunner {
             if(message.type != 'stop') return;
 
             process.removeAllListeners('message')
-            this._onShutdownCallbacks.map(f => f(0))
+            this._onShutdownCallbacks.map(f => f(message.data.code || 0))
 
         })
 

@@ -8,7 +8,7 @@ export type TaskRunnerIncomingMessageType =
 
 export type TaskRunnerTimeoutMessageData = { timeout: number, task_uid: string, task: string }
 
-export type TaskRunnerStopMessageData = {}
+export type TaskRunnerStopMessageData = { code: number }
 
 export type TaskRunnerClearMessageData = { task_uid: string, task: string }
 
