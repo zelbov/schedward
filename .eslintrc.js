@@ -1,7 +1,6 @@
 module.exports =  {
     parser: '@typescript-eslint/parser',
     extends: [
-        'plugin:react/recommended',
         'plugin:@typescript-eslint/recommended',
     ],
     parserOptions: {
@@ -18,10 +17,5 @@ module.exports =  {
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/ban-types': 'off',
-    },
-    settings: {
-        react: {
-            version: 'detect'
-        },
-    },
+    }
 };
