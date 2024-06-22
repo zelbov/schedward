@@ -3,6 +3,12 @@
   "version": "0.1.0",
   "description": "Smart scheduled tasks manager for Node",
   "main": "dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": "./dist/src/index.js",
+    "./*": null,
+    "./dist": null
+  },
   "scripts": {
     "build": "npx tsc",
     "watch": "npx tsc --watch",
@@ -30,8 +36,9 @@
   "devDependencies": {
     "@types/chai": "^4.3.16",
     "@types/mocha": "^10.0.6",
+    "@types/node": "^20.14.7",
     "@typescript-eslint/eslint-plugin": "5.45",
-    "chai": "^5.1.1",
+    "chai": "4.3",
     "mocha": "^10.4.0",
     "module-alias": "^2.2.3",
     "source-map-support": "^0.5.21",
