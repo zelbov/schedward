@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "commonjs",
+        "outDir": "dist",
+        "baseUrl": ".",
+        "paths": {
+            "schedward": ["./src/index.ts"],
+        },
+        "strict": true,
+        "removeComments": false,
+        "esModuleInterop": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "strictNullChecks": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true,
+        "skipDefaultLibCheck": true,
+        "inlineSourceMap": true,
+        "declaration": true,
+        "resolveJsonModule": true,
+        "allowJs": true
+    },
+    "include": ["./src", "./test"],
+    "exclude": [
+        "dist", "node_modules", ".trash"
+    ]
+}

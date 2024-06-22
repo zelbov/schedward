@@ -1,0 +1,12 @@
+/.circleci
+/src
+/test
+/dist/test/
+/dist/*.js
+tsconfig.json
+.gitignore
+.git
+.eslintrc.js
+*.tgz
+/TODO
+
