@@ -1,0 +1,53 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5
+
+jobs:
+
+  test-node:
+    docker:
+      - image: cimg/node:18.20
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Build with Node tests
+          command: npm run build
+      - run:
+          name: Run tests
+          command: npm test --passWithNoTests
+
+  build:
+    docker:
+      - image: cimg/node:18.20
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Build package
+          command: npm run build
+
+  lint:
+    docker:
+      - image: cimg/node:18.20
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          command: npm run lint
+
+
+workflows:
+  build-and-test:
+    jobs:
+      - lint
+      - build:
+          requires:
+            - lint
+      - test-node:
+          requires:
+            - build
