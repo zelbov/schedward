@@ -29,6 +29,17 @@
       "./*": []
     }
   },
+  "keywords": [
+    "setTimeout",
+    "load balancing",
+    "node.js",
+    "event loop",
+    "process pool",
+    "concurrency",
+    "cluster",
+    "garbage collection",
+    "heap pollution"
+  ],
   "author": "Zelbov",
   "license": "MIT",
   "bugs": {
