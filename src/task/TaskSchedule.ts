@@ -1,11 +1,11 @@
 import { EventEmitter } from "stream";
-import { TimeoutCallHandler, TimeoutResponse, TimeoutClearResponse, TimeoutClearHandler } from "../types/TaskSchedule.types";
+import { TimeoutCallHandler, TimeoutResponse, TimeoutClearHandler } from "../types/TaskSchedule.types";
 
 
 export declare interface TaskSchedule extends EventEmitter {
 
-    emit(type: 'timeout', e: TimeoutResponse): boolean
-    addListener(type: 'timeout', listener: (e: TimeoutResponse) => void): this
+    emit<ParamsType extends Object>(type: 'timeout', e: TimeoutResponse<ParamsType>): boolean
+    addListener<ParamsType extends Object = {[key: string]: any}>(type: 'timeout', listener: (e: TimeoutResponse<ParamsType>) => void): this
 
 }
 
@@ -19,13 +19,13 @@ export class TaskSchedule extends EventEmitter {
         super()
     }
 
-    timeout(task_uid: string, timeout: number) {
+    timeout<ParamsType extends Object>(task_uid: string, timeout: number, params?: ParamsType) {
 
-        this.timeoutCallHandler(task_uid, this.taskName, timeout)
+        this.timeoutCallHandler(task_uid, this.taskName, timeout, params)
 
     }
 
-    async clear(task_uid: string) {
+    clear(task_uid: string) {
 
         this.timeoutClearHandler(task_uid, this.taskName)
 

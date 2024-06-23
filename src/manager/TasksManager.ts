@@ -10,9 +10,7 @@ export class TaskManager {
     private _schedules: {[name: string]: TaskSchedule } = {};
     private _running: boolean = true
 
-    constructor(){}
-
-    private handleTimeoutCall (task_uid: string, task: string, timeout: number) {
+    private handleTimeoutCall <ParamsType extends Object>(task_uid: string, task: string, timeout: number, params?: ParamsType) {
 
         if(!this._runners.length) throw new Error('No task runners in pool. Perhaps you forgot to call `TaskManager.launch()` first?')
 
@@ -20,8 +18,12 @@ export class TaskManager {
         if(this._current >= this._runners.length) this._current = 0;
 
         const worker = this._runners[workerIdx],
-            message : TaskRunnerIncomingMessage<TaskRunnerTimeoutMessageData> = {
-                type: 'timeout', data: { task_uid, timeout, task }
+            message : TaskRunnerIncomingMessage<TaskRunnerTimeoutMessageData<ParamsType>> = {
+                type: 'timeout', data: {
+                    task_uid, timeout, task,
+                    // make a deep copy of passed params object
+                    params: params ? JSON.parse(JSON.stringify(params)) : undefined
+                }
             }
 
         if(!worker) throw new Error('Worker with idx #'+workerIdx+' does not exist in runners pool')
@@ -64,11 +66,11 @@ export class TaskManager {
 
     private initWorkerTimeoutHandler(worker: Worker){
 
-        worker.on('message', (message: TaskRunnerOutgoingMessage<TaskRunnerTimeoutMessageData>) => {
+        worker.on('message', (message: TaskRunnerOutgoingMessage<TaskRunnerTimeoutMessageData<{}>>) => {
 
             if(message.type != 'timeout') return;
 
-            const { task, task_uid, timeout } = message.data
+            const { task, task_uid, timeout, params } = message.data
 
             let schedule = this._schedules[task]
 
@@ -78,7 +80,7 @@ export class TaskManager {
                 task
             )
 
-            schedule.emit('timeout', { task_uid, timeout })
+            schedule.emit('timeout', { task_uid, timeout, params })
 
         })
 

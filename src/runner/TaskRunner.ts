@@ -16,7 +16,7 @@ export class TaskRunner {
 
     private initStopHandler(){
 
-        process.on('message', (message: TaskRunnerIncomingMessage<TaskRunnerStopMessageData>, sendHandle) => {
+        process.on('message', (message: TaskRunnerIncomingMessage<TaskRunnerStopMessageData>) => {
 
             if(message.type != 'stop') return;
 
@@ -29,21 +29,21 @@ export class TaskRunner {
 
     private initTimeoutHandler(){
 
-        process.on('message', (message: TaskRunnerIncomingMessage<TaskRunnerTimeoutMessageData>) => {
+        process.on('message', (message: TaskRunnerIncomingMessage<TaskRunnerTimeoutMessageData<{}>>) => {
 
             if(message.type != 'timeout') return;
 
-            const { task_uid, timeout, task } = message.data,
+            const { task_uid, timeout, task, params } = message.data,
                 iat = new Date().getTime() + timeout
 
             if(!this._registry[task]) this._registry[task] = {}
             this._registry[task][task_uid] = {
 
-                iat, timeout,
+                iat, timeout, params,
                 handler: setTimeout(() => {
 
-                    const response : TaskRunnerOutgoingMessage<TaskRunnerTimeoutMessageData> = {
-                        type: 'timeout', data: { task_uid, timeout, task }
+                    const response : TaskRunnerOutgoingMessage<TaskRunnerTimeoutMessageData<{}>> = {
+                        type: 'timeout', data: { task_uid, timeout, task, params }
                     }
                     
                     process && process.send && process.send(response)
