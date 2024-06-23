@@ -24,6 +24,8 @@ This package offers rather universal solution to reduce that boilerplate, avoid 
 
 - Dereferencing of objects passed as callback parameters from outside callback execution scope by making their deep copies and storing them in a pooled process heap instead
 
+- Failover hooks for storing and redistributing task registries across runners pool upon application restart
+
 - Separation of tasks according to scheduled operation logical purpose
 
 - Stateless, isolated scheduled task callbacks
@@ -87,7 +89,6 @@ You might also need to look in a direction of horizontal system scaling solution
 
 Future versions of this package are planned to provide additional features:
 
-- Failover hooks for storing and redistributing task registries across runners pool upon application restart
 - Handle crash events and errors in a task runners pool
 - Benchmarking and GC tracing
 - Extended documentation
