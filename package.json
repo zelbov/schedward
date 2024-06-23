@@ -7,7 +7,8 @@
   "exports": {
     ".": "./dist/src/index.js",
     "./*": null,
-    "./dist": null
+    "./dist": null,
+    "./async": "./dist/src/async/index.js"
   },
   "scripts": {
     "build": "npx tsc",

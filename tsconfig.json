@@ -6,6 +6,7 @@
         "baseUrl": ".",
         "paths": {
             "schedward": ["./src/index.ts"],
+            "schedward/async": ["./src/async/index.ts"]
         },
         "strict": true,
         "removeComments": false,
