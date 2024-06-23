@@ -1,6 +1,6 @@
 {
   "name": "schedward",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Smart scheduled tasks manager for Node",
   "main": "dist/src/index.js",
   "types": "./dist/src/index.d.ts",
