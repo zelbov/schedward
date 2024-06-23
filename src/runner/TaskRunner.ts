@@ -1,4 +1,4 @@
-import { TaskRunnerClearMessageData, TaskRunnerDumpRequestData, TaskRunnerDumpResponseData, TaskRunnerIncomingMessage, TaskRunnerOutgoingMessage, TaskRunnerRegistry, TaskRunnerRegistryDump, TaskRunnerStopMessageData, TaskRunnerTimeoutMessageData } from "src/types/TaskRunner.types"
+import { TaskRunnerClearMessageData, TaskRunnerDumpRequestData, TaskRunnerDumpResponseData, TaskRunnerIncomingMessage, TaskRunnerOutgoingMessage, TaskRunnerReadyResponseData, TaskRunnerRegistry, TaskRunnerRegistryDump, TaskRunnerStopMessageData, TaskRunnerTimeoutMessageData } from "src/types/TaskRunner.types"
 
 export class TaskRunner {
 
@@ -12,6 +12,11 @@ export class TaskRunner {
         this.initTimeoutHandler()
         this.initClearHandler()
         this.initDumpRequestHandler()
+        
+        const ready : TaskRunnerOutgoingMessage<TaskRunnerReadyResponseData> = {
+            type: 'ready', data: {}
+        }
+        process && process.send && process.send(ready)
 
     }
 

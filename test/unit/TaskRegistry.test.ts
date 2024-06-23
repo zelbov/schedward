@@ -10,13 +10,13 @@ describe('TaskRegistry unit tests', () => {
 
         before(async function(){
 
-            manager.launch(8)
+            await new Promise<void>(r => manager.launch(8, r))
 
         })
 
         after(async function(){
 
-            manager.stop()
+            await new Promise<void>(r => manager.stop(r))
 
         })
 
@@ -55,13 +55,13 @@ describe('TaskRegistry unit tests', () => {
 
         before(async function(){
 
-            manager.launch(8)
+            await new Promise<void>(r => manager.launch(8, r))
 
         })
 
         after(async function(){
 
-            manager.stop()
+            await new Promise<void>(r => manager.stop(r))
 
         })
 
@@ -93,13 +93,13 @@ describe('TaskRegistry unit tests', () => {
 
         before(async function(){
 
-            manager.launch(8)
+            await new Promise<void>(r => manager.launch(8, r))
 
         })
 
         after(async function(){
 
-            manager.stop()
+            await new Promise<void>(r => manager.stop(r))
 
         })
 
@@ -113,8 +113,7 @@ describe('TaskRegistry unit tests', () => {
             await new Promise<void>((resolve) => manager.makeTaskRegistrySnapshot(response => {
 
                 snap = response
-                manager.stop()
-                resolve()
+                manager.stop(resolve)
 
             }))
 
@@ -123,7 +122,7 @@ describe('TaskRegistry unit tests', () => {
 
         it('Restart manager and reload tasks snapshot: should execute all tasks', async function() {
 
-            manager.launch(8)
+            await new Promise<void>(r => manager.launch(8, r))
 
             manager.loadTaskRegistry(snap)
 

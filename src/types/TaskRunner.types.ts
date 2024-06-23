@@ -31,16 +31,20 @@ export type TaskRunnerOutgoingMessageType =
 | 'clear'
 | 'dump'
 | 'error'
+| 'ready'
 
 export type TaskRunnerErrorMessageData = { error: string, task_uid?: string, task?: string }
 
 export type TaskRunnerDumpResponseData = { registry: TaskRunnerRegistryDump }
+
+export type TaskRunnerReadyResponseData = {}
 
 type TaskRunnerAnyOutgoingMessage =
 | TaskRunnerTimeoutMessageData<{}>
 | TaskRunnerErrorMessageData
 | TaskRunnerClearMessageData
 | TaskRunnerDumpResponseData
+| TaskRunnerReadyResponseData
 
 export type TaskRunnerOutgoingMessage<
     DataType extends TaskRunnerAnyOutgoingMessage

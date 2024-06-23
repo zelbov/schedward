@@ -10,13 +10,13 @@ describe('TaskManager unit tests', () => {
 
         after(async function() {
 
-            mgr.stop()
+            await new Promise<void>(r => mgr.stop(r))
 
         })
 
-        it('Launch task runners pool through task manager: should succeed', () => {
+        it('Launch task runners pool through task manager: should succeed', async function() {
 
-            mgr.launch(8)
+            await new Promise<void>(r => mgr.launch(8, r))
 
             expect(mgr.numWorkers).eq(8)
 
@@ -29,11 +29,11 @@ describe('TaskManager unit tests', () => {
         const mgr = new TaskManager()
 
         before(async function() {
-            mgr.launch(8)
+            await new Promise<void>(r => mgr.launch(8, r))
         })
 
         after(async function() {
-            mgr.stop()
+            await new Promise<void>(r => mgr.stop(r))
         })
 
         it('Schedule short period timeout: should succeed & trigger according event', async function() {

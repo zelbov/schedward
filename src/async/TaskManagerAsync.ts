@@ -9,4 +9,16 @@ export class TaskManagerAsync extends TaskManager {
 
     }
 
+    public async launch(concurrency: number){
+
+        return await new Promise<void>((resolve) => super.launch(concurrency, () => resolve()))
+
+    }
+
+    public async stop() {
+
+        return await new Promise<void>((resolve) => super.stop(() => resolve()))
+
+    }
+
 }

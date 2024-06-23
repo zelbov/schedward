@@ -8,13 +8,13 @@ describe('TaskParams unit testing', () => {
 
     before(async function(){
 
-        manager.launch(8)
+        await new Promise<void>(r => manager.launch(8, r))
     
     })
 
     after(async function(){
 
-        manager.stop()
+        await new Promise<void>(r => manager.stop(r))
 
     })
 

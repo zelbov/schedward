@@ -1,9 +1,11 @@
 import { join } from "path"
 import cluster, { Worker } from 'cluster'
 import { TaskSchedule } from "../task/TaskSchedule";
-import { TaskRunnerClearMessageData, TaskRunnerDumpRequestData, TaskRunnerDumpResponseData, TaskRunnerIncomingMessage, TaskRunnerOutgoingMessage, TaskRunnerRegistryDump, TaskRunnerTimeoutMessageData } from "src/types/TaskRunner.types";
+import { TaskRunnerClearMessageData, TaskRunnerDumpRequestData, TaskRunnerDumpResponseData, TaskRunnerIncomingMessage, TaskRunnerOutgoingMessage, TaskRunnerReadyResponseData, TaskRunnerRegistryDump, TaskRunnerTimeoutMessageData } from "src/types/TaskRunner.types";
 
 const BOOTSTRAP_PATH = join(__dirname, '..', 'runner', 'bootstrap.js')
+
+const IDLE_ERROR = 'Task manager is idle. Start a runners pool by using `launch()` method and wait for a callback'
 
 export class TaskManager {
 
@@ -23,7 +25,7 @@ export class TaskManager {
 
     private handleTimeoutCall <ParamsType extends Object>(task_uid: string, task: string, timeout: number, params?: ParamsType) {
 
-        if(!this._runners.length) throw new Error('No task runners in pool. Perhaps you forgot to call `TaskManager.launch()` first?')
+        if(!this._running) throw new Error(IDLE_ERROR)
 
         let workerIdx = this._current++
         if(this._current >= this._runners.length) this._current = 0;
@@ -46,6 +48,8 @@ export class TaskManager {
 
     private handleTimeoutClearCall (task_uid: string, task: string) {
 
+        if(!this._running) throw new Error(IDLE_ERROR)
+
         const message: TaskRunnerIncomingMessage<TaskRunnerClearMessageData> = {
             type: 'clear', data: { task_uid, task }
         }
@@ -54,7 +58,9 @@ export class TaskManager {
 
     }
 
-    public launch(concurrency: number){
+    public launch(concurrency: number, callback: () => void){
+
+        if(concurrency <= 0) throw new Error('`concurrency` parameter must be a positive integer')
 
         if(this._running) throw new Error('TaskManager already running')
 
@@ -68,7 +74,29 @@ export class TaskManager {
             this._runners.push(runner)
         }
 
-        this._running = true
+        Promise.all(
+
+            this._runners.map(runner => {
+
+                return new Promise<void>((resolve) => {
+
+                    runner.addListener('message', (msg: TaskRunnerOutgoingMessage<TaskRunnerReadyResponseData>) => {
+
+                        if(msg.type != 'ready') return;
+    
+                        resolve()
+    
+                    })
+
+                })
+
+            })
+        ).then(() => {
+
+            this._running = true
+            if(callback) callback()
+
+        })
 
     }
 
@@ -118,19 +146,37 @@ export class TaskManager {
 
     }
 
-    public stop() {
+    public stop(callback?: () => void) {
 
-        this._running = false
-        for(let runner of this._runners) {
-            if(!runner.isDead()) runner.send({ type: 'stop', data: {} })
+        if(!this._running) {
+            if(callback) callback()
+            return;
         }
-        this._runners = []
+
+        Promise.all(this._runners.map(runner => {
+
+            return new Promise<void>((resolve) => {
+
+                if(runner.isDead()) return resolve()
+                runner.send({ type: 'stop', data: {} })
+                //TODO: listen for errors and pass into callback
+                runner.addListener('exit', () => resolve())
+
+            })
+
+        })).then(() => {
+
+            this._runners = []
+            this._running = false
+            if(callback) callback()
+
+        })
 
     }
 
     public loadTaskRegistry(registry: TaskRunnerRegistryDump) {
 
-        if(!this._running) throw new Error('Task manager is idle. Start a process pool by using `launch()` method')
+        if(!this._running) throw new Error(IDLE_ERROR)
 
         Object.keys(registry).map(task => {
 
@@ -150,7 +196,7 @@ export class TaskManager {
 
     public makeTaskRegistrySnapshot(callback: (snapshot: TaskRunnerRegistryDump) => void) {
 
-        if(!this._running) throw new Error('Task manager is idle. Start a process pool by using `launch()` method')
+        if(!this._running) throw new Error(IDLE_ERROR)
 
         const cache : TaskRunnerRegistryDump = {}
 
@@ -196,5 +242,6 @@ export class TaskManager {
 
     public get numWorkers() { return this._runners.length }
     public get running() { return this._running }
+    public get taskList() { return Object.keys(this._schedules) }
 
 }

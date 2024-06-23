@@ -46,22 +46,27 @@ const manager = new TaskManager(),
     concurrency = 1 // number of task runners in a pool
 
 // launch a pool of task runners for an instance of task manager
-manager.launch(concurrency)
+manager.launch(concurrency, () => {
 
-manager
-    // pull a task schedule
-    .task('mytask')
-    // add a callback for all tasks triggered within a schedule
-    .addListener('timeout', ({ task_uid }) => {
+    manager
+        // pull a task schedule
+        .task('mytask')
+        // add a callback for all tasks triggered within a schedule
+        .addListener('timeout', ({ task_uid }) => {
 
-        // use task_uid as a unique identifier
-        // can also represent a parameters set composed into a string
-        console.log('Task', task_uid, 'executed')
+            // use task_uid as a unique identifier
+            // can also represent a parameters set composed into a string
+            console.log('Task', task_uid, 'executed')
 
-    })
+            // stop runners pool upon last task execution
+            if(task_uid == 'anothertask') manager.stop()
 
-manager.task('mytask').timeout('newtask', 1000)
-manager.task('mytask').timeout('anothertask', 2000)
+        })
+
+    manager.task('mytask').timeout('newtask', 1000)
+    manager.task('mytask').timeout('anothertask', 2000)
+
+})
 
 // (after 1000ms passed): 
 // -> Task newtask executed

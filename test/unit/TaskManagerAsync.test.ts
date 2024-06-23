@@ -8,13 +8,13 @@ describe('TaskManagerAsync unit tests', () => {
 
     before(async function(){
 
-        manager.launch(8)
+        await manager.launch(8)
 
     })
 
     after(async function() {
 
-        manager.stop()
+        await manager.stop()
         
     })
 
