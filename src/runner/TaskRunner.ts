@@ -43,6 +43,10 @@ export class TaskRunner {
                 iat = new Date().getTime() + timeout
 
             if(!this._registry[task]) this._registry[task] = {}
+
+            if(this._registry[task][task_uid])
+                clearTimeout(this._registry[task][task_uid].handler)
+            
             this._registry[task][task_uid] = {
 
                 iat, timeout, params,
