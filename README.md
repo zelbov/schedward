@@ -96,4 +96,4 @@ Future versions of this package are planned to provide additional features:
 
 - Handle crash events and errors in a task runners pool
 - Benchmarking and GC tracing
-- Extended documentation
+- TaskRunner and process pooling documentation
