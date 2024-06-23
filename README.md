@@ -19,9 +19,13 @@ This package offers rather universal solution to reduce that boilerplate, avoid 
 ## Features
 
 - Distribution of scheduled tasks across a process pool, allowing to scale up a number of event loops and garbage collectors operating with task queues in parallel and balance the load
+
 - Segregation of scheduled tasks queues from application main process, allowing to unload it from continuous, excessive and intensive event loop processing and garbage collection
+
 - Dereferencing of objects passed as callback parameters from outside callback execution scope by making their deep copies and storing them in a pooled process heap instead
+
 - Separation of tasks according to scheduled operation logical purpose
+
 - Stateless, isolated scheduled task callbacks
 
 ## Installation

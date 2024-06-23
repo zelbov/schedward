@@ -1,14 +1,25 @@
 import { join } from "path"
 import cluster, { Worker } from 'cluster'
 import { TaskSchedule } from "../task/TaskSchedule";
-import { TaskRunnerClearMessageData, TaskRunnerIncomingMessage, TaskRunnerOutgoingMessage, TaskRunnerTimeoutMessageData } from "src/types/TaskRunner.types";
+import { TaskRunnerClearMessageData, TaskRunnerDumpRequestData, TaskRunnerDumpResponseData, TaskRunnerIncomingMessage, TaskRunnerOutgoingMessage, TaskRunnerRegistryDump, TaskRunnerTimeoutMessageData } from "src/types/TaskRunner.types";
+
+const BOOTSTRAP_PATH = join(__dirname, '..', 'runner', 'bootstrap.js')
 
 export class TaskManager {
 
-    private _runners: Worker[] = [];
-    private _current: number = 0;
-    private _schedules: {[name: string]: TaskSchedule } = {};
-    private _running: boolean = true
+    private _runners: Worker[];
+    private _current: number;
+    private _schedules: {[name: string]: TaskSchedule };
+    private _running: boolean
+
+    constructor(){
+
+        this._runners = []
+        this._current = 0
+        this._schedules = {}
+        this._running = false
+
+    }
 
     private handleTimeoutCall <ParamsType extends Object>(task_uid: string, task: string, timeout: number, params?: ParamsType) {
 
@@ -45,10 +56,10 @@ export class TaskManager {
 
     public launch(concurrency: number){
 
-        const bootstrapPath = join(__dirname, '..', 'runner', 'bootstrap.js')
+        if(this._running) throw new Error('TaskManager already running')
 
         cluster.setupPrimary({
-            exec: bootstrapPath
+            exec: BOOTSTRAP_PATH
         })
 
         for(let i = 0; i < concurrency; i++) {
@@ -56,6 +67,8 @@ export class TaskManager {
             this.initWorkerMessageHandlers(runner)
             this._runners.push(runner)
         }
+
+        this._running = true
 
     }
 
@@ -111,6 +124,71 @@ export class TaskManager {
         for(let runner of this._runners) {
             if(!runner.isDead()) runner.send({ type: 'stop', data: {} })
         }
+        this._runners = []
+
+    }
+
+    public loadTaskRegistry(registry: TaskRunnerRegistryDump) {
+
+        if(!this._running) throw new Error('Task manager is idle. Start a process pool by using `launch()` method')
+
+        Object.keys(registry).map(task => {
+
+            Object.keys(registry[task]).map(task_uid => {
+
+                const { iat, params } = registry[task][task_uid],
+                    now = new Date().getTime(),
+                    timeout = now >= iat ? 0 : iat - now
+
+                this.task(task).timeout(task_uid, timeout, params)
+
+            })
+
+        })
+
+    }
+
+    public makeTaskRegistrySnapshot(callback: (snapshot: TaskRunnerRegistryDump) => void) {
+
+        if(!this._running) throw new Error('Task manager is idle. Start a process pool by using `launch()` method')
+
+        const cache : TaskRunnerRegistryDump = {}
+
+        Promise.all(
+            this._runners.map(runner => {
+
+                const request : TaskRunnerIncomingMessage<TaskRunnerDumpRequestData> = { type: 'dump', data: {} }
+
+                runner.send(request)
+
+                return new Promise<void>((resolve) => {
+
+                    runner.addListener('message', (message: TaskRunnerOutgoingMessage<TaskRunnerDumpResponseData>) => {
+
+                        if(message.type != 'dump') return;
+
+                        const chunk = message.data.registry
+
+                        Object.keys(chunk).map(task => {
+
+                            if(!cache[task]) cache[task] = {}
+
+                            Object.keys(chunk[task]).map(task_uid => {
+
+                                cache[task][task_uid] = chunk[task][task_uid]
+
+                            })
+
+                        })
+
+                        resolve()
+
+                    })
+
+                })
+
+            })
+        ).then(() => callback(cache))
 
     }
 

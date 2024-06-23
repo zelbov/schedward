@@ -3,3 +3,4 @@ export { TaskSchedule } from './task/TaskSchedule'
 export { TaskRunner } from './runner/TaskRunner'
 
 export { TimeoutResponse } from './types/TaskSchedule.types'
+export { TaskRunnerRegistryDump } from './types/TaskRunner.types'

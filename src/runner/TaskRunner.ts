@@ -1,4 +1,4 @@
-import { TaskRunnerClearMessageData, TaskRunnerIncomingMessage, TaskRunnerOutgoingMessage, TaskRunnerRegistry, TaskRunnerStopMessageData, TaskRunnerTimeoutMessageData } from "src/types/TaskRunner.types"
+import { TaskRunnerClearMessageData, TaskRunnerDumpRequestData, TaskRunnerDumpResponseData, TaskRunnerIncomingMessage, TaskRunnerOutgoingMessage, TaskRunnerRegistry, TaskRunnerRegistryDump, TaskRunnerStopMessageData, TaskRunnerTimeoutMessageData } from "src/types/TaskRunner.types"
 
 export class TaskRunner {
 
@@ -11,6 +11,7 @@ export class TaskRunner {
         this.initStopHandler()
         this.initTimeoutHandler()
         this.initClearHandler()
+        this.initDumpRequestHandler()
 
     }
 
@@ -70,6 +71,36 @@ export class TaskRunner {
 
             clearTimeout(this._registry[task][task_uid].handler)
             delete this._registry[task][task_uid]
+
+        })
+
+    }
+
+    private initDumpRequestHandler() {
+
+        process.on('message', (message: TaskRunnerIncomingMessage<TaskRunnerDumpRequestData>) => {
+
+            if(message.type != 'dump') return;
+
+            const registry : TaskRunnerRegistryDump = {}
+
+            Object.keys(this._registry).map(task => {
+
+                registry[task] = {}
+
+                Object.keys(this._registry[task]).map(task_uid => {
+
+                    const { iat, params, timeout } = this._registry[task][task_uid]
+
+                    registry[task][task_uid] = { iat, params, timeout }
+
+                })
+
+            })
+
+            const response : TaskRunnerOutgoingMessage<TaskRunnerDumpResponseData> = { type: 'dump', data: { registry } }
+
+            process && process.send && process.send(response)
 
         })
 

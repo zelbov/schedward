@@ -12,13 +12,13 @@ export type TaskRunnerStopMessageData = { code: number }
 
 export type TaskRunnerClearMessageData = { task_uid: string, task: string }
 
-export type TaskRunnerDumpMessageData = {}
+export type TaskRunnerDumpRequestData = {}
 
 type TaskRunnerAnyIncomingMessage = 
 | TaskRunnerTimeoutMessageData<{}>
 | TaskRunnerStopMessageData
 | TaskRunnerClearMessageData
-| TaskRunnerDumpMessageData
+| TaskRunnerDumpRequestData
 
 export type TaskRunnerIncomingMessage<
     DataType extends TaskRunnerAnyIncomingMessage
@@ -34,21 +34,38 @@ export type TaskRunnerOutgoingMessageType =
 
 export type TaskRunnerErrorMessageData = { error: string, task_uid?: string, task?: string }
 
+export type TaskRunnerDumpResponseData = { registry: TaskRunnerRegistryDump }
+
 type TaskRunnerAnyOutgoingMessage =
 | TaskRunnerTimeoutMessageData<{}>
 | TaskRunnerErrorMessageData
 | TaskRunnerClearMessageData
-| TaskRunnerDumpMessageData
+| TaskRunnerDumpResponseData
 
 export type TaskRunnerOutgoingMessage<
     DataType extends TaskRunnerAnyOutgoingMessage
 > = { type: TaskRunnerOutgoingMessageType, data: DataType}
 
+type RegistryEntry = { iat: number, timeout: number, params?: {[key: string]: unknown} }
+
+type RegistryEntryWithHandler = RegistryEntry & { handler: NodeJS.Timeout }
+
 export interface TaskRunnerRegistry {
 
     [task: string] : {
 
-        [task_uid: string]: { handler: NodeJS.Timeout, iat: number, timeout: number, params?: Object }
+        [task_uid: string]: RegistryEntryWithHandler
+
+    }
+
+}
+
+export interface TaskRunnerRegistryDump {
+
+
+    [task: string]: {
+
+        [task_uid: string]: RegistryEntry
 
     }
 
