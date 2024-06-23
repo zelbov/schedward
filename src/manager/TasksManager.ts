@@ -17,18 +17,19 @@ export class TaskManager {
         let workerIdx = this._current++
         if(this._current >= this._runners.length) this._current = 0;
 
-        const worker = this._runners[workerIdx],
-            message : TaskRunnerIncomingMessage<TaskRunnerTimeoutMessageData<ParamsType>> = {
+        const worker = this._runners[workerIdx];
+
+        if(!worker) throw new Error('Worker with idx #'+workerIdx+' does not exist in runners pool')
+        
+        let message : TaskRunnerIncomingMessage<TaskRunnerTimeoutMessageData<ParamsType>> | null = {
                 type: 'timeout', data: {
-                    task_uid, timeout, task,
-                    // make a deep copy of passed params object
-                    params: params ? JSON.parse(JSON.stringify(params)) : undefined
+                    task_uid, timeout, task, params
                 }
             }
 
-        if(!worker) throw new Error('Worker with idx #'+workerIdx+' does not exist in runners pool')
-
         worker.send(message)
+
+        message = null
 
     }
 
