@@ -23,6 +23,7 @@ export class TaskSchedule extends EventEmitter {
 
         if(params) params = JSON.parse(JSON.stringify(params))
 
+        this.timeoutClearHandler(task_uid, this.taskName)
         this.timeoutCallHandler(task_uid, this.taskName, timeout, params)
 
     }
