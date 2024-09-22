@@ -12,11 +12,23 @@ export class TaskRunner {
         this.initTimeoutHandler()
         this.initClearHandler()
         this.initDumpRequestHandler()
+        this.initProcessInterruptLock()
         
         const ready : TaskRunnerOutgoingMessage<TaskRunnerReadyResponseData> = {
             type: 'ready', data: {}
         }
         process && process.send && process.send(ready)
+
+    }
+
+    private initProcessInterruptLock(){
+
+        process.on('SIGINT', () => {
+            // postpone SIGINTs received from coordinator's graceful shutdown so that workers can have time to process other commands
+            // like collecting registry snapshots
+            // TODO: make reactive to coordinator shutdown cycle instead of postponing by flat time
+            setTimeout(() => process.exit(0), 10_000)
+        })
 
     }
 
